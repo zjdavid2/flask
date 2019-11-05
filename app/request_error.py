@@ -6,11 +6,18 @@ class RequestError(object):
         error_description = self.name + ' is a required parameter'
         return error_description
 
-    def record_not_found(self):
+    @staticmethod
+    def record_not_found():
         return 'Unable to find the record you are looking for.'
 
-    def no_unique_parameter(self):
+    @staticmethod
+    def no_unique_parameter():
         return 'You must provide one unique parameter.'
 
-    def invalid_hash_id(self):
+    @staticmethod
+    def invalid_hash_id():
         return 'Your hash ID is invalid. It must be a 12-byte input or a 24-character hex string'
+
+    @staticmethod
+    def no_file_uploaded():
+        return 'No file is uploaded.'

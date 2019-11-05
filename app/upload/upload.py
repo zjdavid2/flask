@@ -3,6 +3,10 @@ from app.upload.ipfs_hash import IPFSHash
 from app.request_error import RequestError
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
+from werkzeug.utils import secure_filename
+import os
+from config import Config
+from app.view.view import get_detail_common
 
 upload = Blueprint('upload', __name__, url_prefix='/v1/upload')
 
@@ -51,3 +55,24 @@ def set_IPFS_image_hash_by_gid():
         except InvalidId:
             return jsonify({'msg': RequestError().invalid_hash_id()}), 400
     return jsonify({'msg': RequestError().no_unique_parameter()}), 400
+
+
+# TODO: Authentication Required
+@upload.route('/directUpload/<folder_id>/<order_number>')
+def upload_directly(folder_id, order_number):
+    if 'file' not in request.files:
+        return jsonify({'msg': RequestError().no_file_uploaded()}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'msg': RequestError.no_file_uploaded()}), 400
+    if file:
+        hash_id = ObjectId(folder_id)
+        result = get_detail_common.get_detail_raw('_id', hash_id)
+        if not result:
+            return jsonify({'msg': RequestError.invalid_hash_id()}), 400
+        filename = order_number + '.jpg'
+        dir_path = Config.UPLOAD_FOLDER + "/" + folder_id
+        if not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+        file.save(os.path.join(Config.UPLOAD_FOLDER, filename))
+        return jsonify({'msg': 'Img successfully uploaded'}), 200
