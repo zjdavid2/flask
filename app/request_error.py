@@ -6,6 +6,13 @@ class RequestError(object):
         error_description = self.name + ' is a required parameter'
         return error_description
 
+    def parameter_invalid(self):
+        return self.name + ' is invalid.'
+
+    @staticmethod
+    def file_number_too_big():
+        return 'Your image order number is larger than the expected file count.'
+
     @staticmethod
     def record_not_found():
         return 'Unable to find the record you are looking for.'
