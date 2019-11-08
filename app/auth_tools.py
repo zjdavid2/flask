@@ -19,7 +19,12 @@ def login_required(f):
             return jsonify({"msg": "This session has been revoked"}), 403
         g.user = user
         return f(*args, **kwargs)
+
     return decorated_function
+
+
+def current_user_is_admin():
+    return g.user['group'] == 'admin'
 
 
 def get_user_with_uid(uid: str) -> dict:

@@ -12,10 +12,6 @@ auth_blueprint = Blueprint(
 )
 
 
-
-
-
-
 @auth_blueprint.route('/sign_up', methods=['POST'])
 def sign_up():
     try:
@@ -23,24 +19,26 @@ def sign_up():
         password = request.form["password"]  # 要求8字以上好了
         email = request.form["email"]
     except KeyError:
-        return jsonify({"mag": "Miss parameter"}), 400
-    if len(username) <3 or len(password) <8:
-        return jsonify({"mag": "Username or password is too short"}), 400
+        return jsonify({"msg": "Miss parameter"}), 400
+    if len(username) < 3 or len(password) < 8:
+        return jsonify({"msg": "Username or password is too short"}), 400
     if is_username_exist(username):
-        return jsonify({"mag": "User Exist"}), 200  # 我應該建立一個狀態碼
+        return jsonify({"msg": "User Exist"}), 200  # 我應該建立一個狀態碼
     apply_data = {
-        "un": username,
-        "pw": password,
-        "ml": email,
+        "username": username,
+        "password": password,
+        "email": email,
         "it": int(datetime.datetime.now().timestamp()),
-        "for": "sign_config_accept"
+        "for": "sign_config_accept",
+        "group": "normal"
     }
+    g.db.users.insert_one(apply_data)  # 应该是这么用的？
 
 
 @auth_blueprint.route('/sign_up_accept')
 def sign_config_accept():
     try:
-        code: str= request.args["auth_code"]
+        code: str = request.args["auth_code"]
         auth_code: dict = verify_sing(code)
     except KeyError:
         return jsonify({"msg": "Miss token"}), 400
@@ -48,7 +46,7 @@ def sign_config_accept():
         return jsonify({"msg": "Token broken"}), 400
     if auth_code.get('for') != "sign_config_accept":
         return jsonify({"msg": "Miss token"}), 400
-    if int(datetime.datetime.now().timestamp()) - 60*60*24*2 > auth_code['it']:  # 60*60*24*2是兩天的意思
+    if int(datetime.datetime.now().timestamp()) - 60 * 60 * 24 * 2 > auth_code['it']:  # 60*60*24*2是兩天的意思
         return jsonify({"msg": "Token expired"}), 403
     try:
         username = auth_code["un"]
@@ -77,7 +75,7 @@ def sign_config_accept():
         return jsonify({
             "msg": "Create successful",
             "id": result.inserted_id,
-        }),200
+        }), 200
 
 
 @auth_blueprint.route('/login', methods=['POST'])
@@ -109,9 +107,6 @@ def login():
         "msg": "successful",
         "jwt": signed
     }), 200
-
-
-
 
 
 @auth_blueprint.route('/forget_pwd')
