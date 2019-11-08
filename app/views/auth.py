@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, g
 import jwt
 import pymongo
 import datetime
-from auth_tools import is_username_exist, verify_sing, get_user_with_username, sign
+from app.auth_tools import is_username_exist, verify_sing, get_user_with_username, sign
 import bcrypt
 
 auth_blueprint = Blueprint(
