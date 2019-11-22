@@ -93,8 +93,9 @@ def login():
     hash_pwd: str = user["password"]
     if not bcrypt.checkpw(password.encode(), hash_pwd.encode()):
         return jsonify({"mag": "Username or Password is incorrect"}), 403
+    user_id: str = str(user["_id"])
     token = {
-        "sub": "Mongo的id",
+        "sub": user_id,
         "iss": "example.com",
         "aud": "前端的網址",
         "iat": int(datetime.datetime.now().timestamp()),
