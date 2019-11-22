@@ -3,9 +3,9 @@ from app.upload.ipfs_hash import IPFSHash
 from app.request_error import RequestError
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
-from config import Config
 from app.upload import save_img
-import hashlib
+from app.auth_tools import login_required
+
 
 upload = Blueprint('upload', __name__, url_prefix='/v1/upload')
 
@@ -56,8 +56,8 @@ def set_IPFS_image_hash_by_gid():
     return jsonify({'msg': RequestError().no_unique_parameter()}), 400
 
 
-# TODO: Authentication Required
 @upload.route('/directUpload/<folder_id>/<order_number>', methods=['POST'])
+@login_required
 def upload_directly(folder_id, order_number):
     if 'file' not in request.files:
         return jsonify({'msg': RequestError().no_file_uploaded()}), 400
@@ -66,5 +66,5 @@ def upload_directly(folder_id, order_number):
         return jsonify({'msg': RequestError.no_file_uploaded()}), 400
     expected_sha_1 = None
     if request.form:
-        expected_sha_1 = request.form['sha1']  # c
+        expected_sha_1 = request.form['sha1']  # Optionally check sha1 of the image.
     return save_img.save_img(file, folder_id, order_number, expected_sha_1)
