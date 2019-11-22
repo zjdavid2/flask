@@ -4,6 +4,8 @@ from flask import Flask, g
 import config
 from app.view.view import view
 from app.upload.upload import upload
+from app.auth.auth import auth_blueprint
+from app.connect_database import Connect
 from flask_cors import CORS
 from pymongo import MongoClient
 
@@ -13,9 +15,10 @@ def create_app(config_file=config.Config):
     app.config.from_object(config_file)
     app.register_blueprint(view)
     app.register_blueprint(upload)
+    app.register_blueprint(auth_blueprint)
     CORS(app)
-    client = MongoClient('localhost', 27017)
-    db = client.exhentai
+    # The line below doesn't work
+    # g.db = MongoClient(config_file.DB_SERVER).Production
 
     @app.route('/')
     def hello_world():

@@ -28,3 +28,7 @@ class RequestError(object):
     @staticmethod
     def no_file_uploaded():
         return 'No file is uploaded.'
+
+    @staticmethod
+    def admin_permission_required():
+        return 'Admin permission is required.'

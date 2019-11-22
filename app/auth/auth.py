@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify, g
 import jwt
-import pymongo
 import datetime
-from app.auth_tools import is_username_exist, verify_sing, get_user_with_username, sign
+from app.auth.auth_tools import is_username_exist, verify_sing, get_user_with_username, sign
 import bcrypt
+from config import Config
 
 auth_blueprint = Blueprint(
     "auth_v1",
@@ -14,6 +14,8 @@ auth_blueprint = Blueprint(
 
 @auth_blueprint.route('/sign_up', methods=['POST'])
 def sign_up():
+    if not Config.REGISTER_ENABLED:
+        return jsonify({"msg": "Register is not enabled."}), 400
     try:
         username = request.form["username"]  # 要求3字以上好了
         password = request.form["password"]  # 要求8字以上好了
@@ -96,8 +98,8 @@ def login():
     user_id: str = str(user["_id"])
     token = {
         "sub": user_id,
-        "iss": "example.com",
-        "aud": "前端的網址",
+        "iss": Config.DOMAIN_NAME,
+        "aud": Config.FRONTEND_DOMAIN_NAME,
         "iat": int(datetime.datetime.now().timestamp()),
         "remember": True,
         "type": "login_credential",

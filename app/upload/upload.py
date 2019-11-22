@@ -4,7 +4,7 @@ from app.request_error import RequestError
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from app.upload import save_img
-from app.auth_tools import login_required
+from app.auth.auth_tools import login_required, current_user_is_admin
 
 
 upload = Blueprint('upload', __name__, url_prefix='/v1/upload')
@@ -59,8 +59,10 @@ def set_IPFS_image_hash_by_gid():
 @upload.route('/directUpload/<folder_id>/<order_number>', methods=['POST'])
 @login_required
 def upload_directly(folder_id, order_number):
+    if not current_user_is_admin():
+        return jsonify({'msg': RequestError.admin_permission_required()}), 400
     if 'file' not in request.files:
-        return jsonify({'msg': RequestError().no_file_uploaded()}), 400
+        return jsonify({'msg': RequestError.no_file_uploaded()}), 400
     file = request.files['file']
     if file.filename == '' or not file:
         return jsonify({'msg': RequestError.no_file_uploaded()}), 400
