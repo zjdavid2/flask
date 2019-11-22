@@ -1,0 +1,6 @@
+FROM tiangolo/uwsgi-nginx-flask:python3.7
+
+ENV UWSGI_CHEAPER 4
+ENV UWSGI_PROCESSES 64
+
+COPY ./app /app
