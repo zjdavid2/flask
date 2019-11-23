@@ -25,16 +25,20 @@ def sign_up():
     if len(username) < 3 or len(password) < 8:
         return jsonify({"msg": "Username or password is too short"}), 400
     if is_username_exist(username):
-        return jsonify({"msg": "User Exist"}), 200  # 我應該建立一個狀態碼
+        return jsonify({"msg": "User Exist"}), 400  # 我應該建立一個狀態碼
     apply_data = {
         "username": username,
         "password": password,
         "email": email,
         "it": int(datetime.datetime.now().timestamp()),
         "for": "sign_config_accept",
-        "group": "normal"
     }
-    g.db.users.insert_one(apply_data)  # 应该是这么用的？
+    print(apply_data)
+    signed = sign(apply_data)
+    return jsonify({
+        "msg": "successful",
+        "jwt": signed
+    }), 200
 
 
 @auth_blueprint.route('/sign_up_accept')
@@ -51,11 +55,11 @@ def sign_config_accept():
     if int(datetime.datetime.now().timestamp()) - 60 * 60 * 24 * 2 > auth_code['it']:  # 60*60*24*2是兩天的意思
         return jsonify({"msg": "Token expired"}), 403
     try:
-        username = auth_code["un"]
-        password_hash = auth_code["pw"]
-        mail = auth_code['ml']
+        username = auth_code["username"]
+        password_hash = auth_code["password"]
+        mail = auth_code['email']
     except KeyError:
-        return jsonify({"msg": "Token broken"}), 400
+        return jsonify({"msg": "Token does not contain required data"}), 400
     if is_username_exist(username):
         return jsonify({"msg": "User exist"}), 409
     insert_user = {
@@ -68,7 +72,7 @@ def sign_config_accept():
         'email_change_lock': datetime.datetime.now(),
         'create_time': datetime.datetime.now(),
         'valid_since': datetime.datetime.now(),
-        'enable': True
+        'enabled': True
     }
     result = g.db.users.insert_one(insert_user)
     if not result.acknowledged:
@@ -76,7 +80,7 @@ def sign_config_accept():
     else:
         return jsonify({
             "msg": "Create successful",
-            "id": result.inserted_id,
+            "id": str(result.inserted_id),
         }), 200
 
 

@@ -59,6 +59,7 @@ def set_IPFS_image_hash_by_gid():
 @upload.route('/directUpload/<folder_id>/<order_number>', methods=['POST'])
 @login_required
 def upload_directly(folder_id, order_number):
+    print(request.headers)
     if not current_user_is_admin():
         return jsonify({'msg': RequestError.admin_permission_required()}), 400
     if 'file' not in request.files:
