@@ -1,4 +1,4 @@
-import uwsgi
+import wsgi
 import unittest
 from app.request_error import RequestError
 import random
@@ -8,8 +8,8 @@ from werkzeug.exceptions import HTTPException
 class AppTestCase(unittest.TestCase):
 
     def setUp(self):
-        uwsgi.app.config['TESTING'] = True
-        self.app = uwsgi.app.test_client()
+        wsgi.app.config['TESTING'] = True
+        self.app = wsgi.app.test_client()
 
     def tearDown(self):
         pass

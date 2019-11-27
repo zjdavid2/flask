@@ -1,17 +1,18 @@
 from flask import jsonify
 from app.view import search, get_detail_common
-from flask import Flask, g
+from flask import Flask
 import config
 from app.view.view import view
 from app.upload.upload import upload
 from app.auth.auth import auth_blueprint
 from app.connect_database import Connect
 from flask_cors import CORS
-from pymongo import MongoClient
+import logging
 
 
 def create_app(config_file=config.Config):
     app = Flask(__name__)
+    logging.basicConfig(filename='logs/flask.log', level=logging.DEBUG)
     app.config.from_object(config_file)
     app.register_blueprint(view)
     app.register_blueprint(upload)

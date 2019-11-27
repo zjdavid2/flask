@@ -1,7 +1,7 @@
 import requests
 import bcrypt
 
-base_url = 'http://127.0.0.1:5000'
+base_url = 'https://dd.works'
 
 
 def sign_up(username: str, password: str, email: str):
@@ -10,6 +10,7 @@ def sign_up(username: str, password: str, email: str):
     data = {'username': username, 'password': hashed_password, 'email': email}
 
     r = requests.post(register_url, data)
+    print(r.text)
     return r.json()['jwt']
 
 

@@ -1,3 +1,5 @@
+from typing import Dict, Any, Union
+
 from flask import Blueprint, request, jsonify
 from app.upload.ipfs_hash import IPFSHash
 from app.request_error import RequestError
@@ -71,3 +73,13 @@ def upload_directly(folder_id, order_number):
     if request.form:
         expected_sha_1 = request.form['sha1']  # Optionally check sha1 of the image.
     return save_img.save_img(file, folder_id, order_number, expected_sha_1)
+
+
+@upload.route('/uploadRecord', methods=['POST'])
+@login_required
+def upload_records():
+    request_json: dict = request.get_json(force=True, silent=True) or {}
+    if len(request_json) == 0:
+        return jsonify({'msg': RequestError('json').required_parameter_not_found()})
+    return 'Method not implemented!'
+
