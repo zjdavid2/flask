@@ -6,6 +6,7 @@ import io
 import re
 import time
 import requests
+from config import Config
 
 cookie = "ipb_member_id=9999999;ipb_pass_hash=ffffffffffffffff"
 
@@ -91,9 +92,9 @@ def write_tmp(output_file):
 def main(latest_posted):
     global nextLatestTimestamp, cookie, headers4search, headers
     # latest_posted = 1574553600
-    ipb_member_id = "4944111"
-    ipb_pass_hash = "efe917bf782e16c80463e9dc5ac7c105"
-    outputfile = "gdata.json"
+    ipb_member_id = Config.IPB_MEMBER_ID
+    ipb_pass_hash = Config.IPB_PASS_HASH
+    outputfile = "gdata_roll.json"
 
     cookie = ("ipb_member_id=" + str(ipb_member_id) + ";ipb_pass_hash=" + str(ipb_pass_hash))
     headers4search['Cookie'] = cookie
@@ -103,7 +104,7 @@ def main(latest_posted):
     nextLatestTimestamp = latest_posted
     page = 0
     global oldestTimestamp
-    while oldestTimestamp > latest_posted:
+    while oldestTimestamp >= latest_posted:
         print("Now oldest " + str(oldestTimestamp) + " > " + str(latest_posted))
         print("Requesting search page " + str(page + 1) + "...")
         search_html = getSearchHtml(page)

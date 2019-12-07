@@ -48,6 +48,10 @@ def get_detail():
     return jsonify({'msg': RequestError().no_unique_parameter()})
 
 
-@view.route('/getFullTagList')
+@view.route('/getTagList')
 def get_full_tag_list():
-    return get_tag_list.get_tag_list()
+    name = request.args.get('name', '')
+    if not name:
+        return get_tag_list.get_tag_list()
+    else:
+        return get_tag_list.get_tag_list_filtered_by(name)

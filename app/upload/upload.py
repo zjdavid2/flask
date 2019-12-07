@@ -69,10 +69,11 @@ def upload_directly(folder_id, order_number):
     file = request.files['file']
     if file.filename == '' or not file:
         return jsonify({'msg': RequestError.no_file_uploaded()}), 400
-    expected_sha_1 = None
+    expected_sha_1, file_extension = None, None
     if request.form:
-        expected_sha_1 = request.form['sha1']  # Optionally check sha1 of the image.
-    return save_img.save_img(file, folder_id, order_number, expected_sha_1)
+        expected_sha_1 = request.form.get('sha1', None)  # Optionally check sha1 of the image.
+        file_extension = request.form.get('extension', None)
+    return save_img.save_img(file, folder_id, order_number, expected_sha_1, file_extension)
 
 
 @upload.route('/uploadRecord', methods=['POST'])

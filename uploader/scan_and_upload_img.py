@@ -9,8 +9,15 @@ import logging
 import threading
 
 
+def chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
+
 class ScanAndUpload:
     base_url = 'https://dd.works'
+    # base_url = 'http://127.0.0.1:5000'
     view_url = base_url + '/v1/view/getDetail'
     upload_url = base_url + '/v1/upload/directUpload'
     login_url = base_url + '/v1/auth'
@@ -59,10 +66,14 @@ class ScanAndUpload:
     def upload_one(self, hash_id, title, file_name, index, zip_file_name, zip_index, headers):
         upload_complete_url = self.upload_url + '/' + hash_id + '/' + str(index)
         file = open(os.path.join(title, file_name), 'rb')
+        file_extension = os.path.splitext(file_name)[1]
         file_hash = self.sha1(os.path.join(title, file_name))
         files = {'file': file}
         try:
-            r_upload = requests.post(upload_complete_url, files=files, data={'sha1': file_hash}, headers=headers)
+            r_upload = requests.post(upload_complete_url, files=files,
+                                     data={'sha1': file_hash,
+                                           'extension': file_extension}, headers=headers)
+            print(r_upload.text)
         except:
             logging.error(file_name + ' upload failed.')
             self.move_to_failed(zip_file_name)
@@ -82,6 +93,42 @@ class ScanAndUpload:
         print(info_log)
         logging.info(info_log)
         self.logger.handlers[0].flush()
+
+    def upload_all_named_hash_id_in_directory(self):
+        jwt_token = self.login('zjdavid', 'torsan89')
+        headers = {'auth': jwt_token}
+
+        zip_list = [f for f in glob.glob("*.zip")]  # 获取本目录下的所有zip文件
+
+        for zip_index, zip_file_name in enumerate(zip_list):
+            title = re.split('\\.zip', zip_file_name)[0]
+            logging.info('Uploading: ' + title)
+            print(title)
+            try:
+                with zipfile.ZipFile(zip_file_name, "r") as zip_ref:
+                    hash_id = title
+                    zip_ref.extractall(title)  # 解压到标题目录
+                    thread_list = []
+
+                    for index, file_name in enumerate(sorted(os.listdir(title))):
+                        t = threading.Thread(target=self.upload_one, args=(hash_id, title, file_name, index,
+                                                                           zip_file_name, zip_index, headers))
+                        thread_list.append(t)
+                    thread_trunks = chunks(thread_list, 10)
+                    for small_thread_list in thread_trunks:
+                        for thread in small_thread_list:
+                            thread.start()
+                        for thread in small_thread_list:
+                            thread.join()
+                    self.move_to_completed(zip_file_name)
+                    shutil.rmtree(title, ignore_errors=True)
+            except zipfile.BadZipFile:
+                logging.error(zip_file_name + ' is not a valid zip file.')
+                self.move_to_failed(zip_file_name)
+            except Exception as ex:
+                logging.error(zip_file_name + ' encountered an error.')
+                logging.error(ex)
+                self.move_to_failed(zip_file_name)
 
     def upload_all_in_directory(self):
         jwt_token = self.login('zjdavid', 'torsan89')
@@ -114,10 +161,12 @@ class ScanAndUpload:
                         t = threading.Thread(target=self.upload_one, args=(hash_id, title, file_name, index,
                                                                            zip_file_name, zip_index, headers))
                         thread_list.append(t)
-                    for thread in thread_list:
-                        thread.start()
-                    for thread in thread_list:
-                        thread.join()
+                    thread_trunks = chunks(thread_list, 10)
+                    for small_thread_list in thread_trunks:
+                        for thread in small_thread_list:
+                            thread.start()
+                        for thread in small_thread_list:
+                            thread.join()
                     self.move_to_completed(zip_file_name)
                     shutil.rmtree(title, ignore_errors=True)
             except zipfile.BadZipFile:

@@ -8,11 +8,21 @@ from app.auth.auth import auth_blueprint
 from app.connect_database import Connect
 from flask_cors import CORS
 import logging
+from app.scheduled_tasks.update_metadata import upload_metadata_using_json
+
+from apscheduler.schedulers.background import BackgroundScheduler
+from flask import Flask
+import atexit
 
 
 def create_app(config_file=config.Config):
+    # sched = BackgroundScheduler(daemon=True)
+    # sched.add_job(upload_metadata_using_json, 'interval', minutes=10)  # Sync library with exhentai every 10 minutes.
+    # sched.start()
+    # atexit.register(lambda: sched.shutdown())
+
     app = Flask(__name__)
-    logging.basicConfig(filename='logs/flask.log', level=logging.DEBUG)
+    # logging.basicConfig(filename='flask.log', level=logging.DEBUG)
     app.config.from_object(config_file)
     app.register_blueprint(view)
     app.register_blueprint(upload)

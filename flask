@@ -1,0 +1,10 @@
+server {
+    listen 80;
+    server_name dd.works www.dd.works;
+    client_max_body_size 50M;
+
+    location / {
+        include uwsgi_params;
+        uwsgi_pass unix:/home/zjdavid/flask/ddflask.sock;
+    }
+}
