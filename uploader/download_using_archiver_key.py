@@ -4,28 +4,32 @@ import os
 from uploader.pop_undownloaded_item import pop_undownloaded_item
 from uploader.scan_and_upload_img import ScanAndUpload
 from config import Config
+from requests.exceptions import *
 
 proxy_list = []
 
 
 def get_proxy_list():
     # 隧道服务器
-    tunnel_host = "tps181.kdlapi.com"
+    tunnel_host = "tps189.kdlapi.com"
     tunnel_port = "15818"
 
     # 隧道id和密码
-    tid = "t17568051491391"
-    password = "i0n6h7kc"
-
-    proxy = "http://%s:%s@%s:%s/" % (tid, password, tunnel_host, tunnel_port)
+    username = "zjdavid.2003"
+    password = "h9cx36wg"
+    r = requests.get(
+        'https://dps.kdlapi.com/api/getdps/?orderid=987569609393130&num=1&pt=1&format=json&sep=1')
+    print("Pulled one proxy from server")
+    proxy = r.json()['data']['proxy_list'][0]
+    proxy_with_credential = "http://%(user)s:%(pwd)s@%(proxy)s/" % {'user': username, 'pwd': password,
+                                                                    'proxy': proxy}
     global proxy_list
-    proxy_list = [proxy]
-    # r = requests.get('https://dev.kdlapi.com/api/getproxy/?orderid=987495241559611&num=100&protocol=2&method=2&an_an=1&an_ha=1&sep=2')
-    # proxy_list = r.text.splitlines()
+    proxy_list = [proxy_with_credential]
 
 
 def download_using_archiver_key(record):
     try:
+        print(record['_id'])
         ex = record['ex']
         if ex.get('archiver_key') is None:
             return  # Archiver key not found.
@@ -47,7 +51,7 @@ def download_using_archiver_key(record):
         os.rename(file_name, str(record['_id']) + '.zip')
         print('Created: ' + new_name)
         return new_name
-    except:  # This proxy fails.
+    except (ConnectTimeout, ProxyError):  # This proxy fails.
         proxy_list.pop(0)
         print('Pop one from proxy list.')
         if not proxy_list:
@@ -71,6 +75,7 @@ def download_file(url):
 if __name__ == '__main__':
     get_proxy_list()
     print(proxy_list)
+    ScanAndUpload().upload_all_named_hash_id_in_directory()
     while True:
         record = pop_undownloaded_item(1)[0]
         download_using_archiver_key(record)
