@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import os
 from uploader.pop_undownloaded_item import pop_undownloaded_item
 from uploader.scan_and_upload_img import ScanAndUpload
+from config import Config
 
 proxy_list = []
 
@@ -36,7 +37,7 @@ def download_using_archiver_key(record):
         url = 'https://exhentai.org/archiver.php?gid=' + ex['gid'] + '&token=' + ex['token'] + '&or=' + archiver_key
         # data = 'dltype=org&dlcheck=Download+Original+Archive'
         data = {'dtype': 'org', 'dlcheck': 'Download Original Archive'}
-        cookie = {'ipb_member_id': '4944111', 'ipb_pass_hash': 'efe917bf782e16c80463e9dc5ac7c105', 'igneous': 'c3737b9c2'}
+        cookie = {'ipb_member_id': Config.IPB_MEMBER_ID, 'ipb_pass_hash': Config.IPB_PASS_HASH, 'igneous': 'c3737b9c2'}
         r = requests.post(url, data=data, cookies=cookie, proxies=proxies, timeout=15)
         soup = BeautifulSoup(r.text, 'lxml')
         print(soup.prettify())

@@ -16,13 +16,13 @@ import atexit
 
 
 def create_app(config_file=config.Config):
-    # sched = BackgroundScheduler(daemon=True)
-    # sched.add_job(upload_metadata_using_json, 'interval', minutes=10)  # Sync library with exhentai every 10 minutes.
-    # sched.start()
-    # atexit.register(lambda: sched.shutdown())
+    sched = BackgroundScheduler(daemon=True)
+    sched.add_job(upload_metadata_using_json, 'interval', minutes=5)  # Sync library with exhentai every 5 minutes.
+    sched.start()
+    atexit.register(lambda: sched.shutdown())
 
     app = Flask(__name__)
-    # logging.basicConfig(filename='flask.log', level=logging.DEBUG)
+    logging.basicConfig(filename='flask.log', level=logging.DEBUG)
     app.config.from_object(config_file)
     app.register_blueprint(view)
     app.register_blueprint(upload)
