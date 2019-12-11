@@ -1,7 +1,7 @@
 import json
 from app.connect_database import Connect
 from datetime import datetime
-import app.scheduled_tasks.exmetacrawler as crawler
+import app.background_tasks.exmetacrawler as crawler
 import re
 
 

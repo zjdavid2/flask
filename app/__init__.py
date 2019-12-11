@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, g
 from app.view import search, get_detail_common
 from flask import Flask
 import config
@@ -9,11 +9,12 @@ from app.ex_extension import extension
 from app.connect_database import Connect
 from flask_cors import CORS
 import logging
-from app.scheduled_tasks.update_metadata import upload_metadata_using_json
+from app.background_tasks.update_metadata import upload_metadata_using_json
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask
 import atexit
+from celery import Celery
 
 
 def create_app(config_file=config.Config):
@@ -30,6 +31,9 @@ def create_app(config_file=config.Config):
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(extension)
     CORS(app)
+
+    celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
+    celery.conf.update(app.config)
     # The line below doesn't work
     # g.db = MongoClient(config_file.DB_SERVER).Production
 

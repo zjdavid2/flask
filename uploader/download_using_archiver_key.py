@@ -19,6 +19,8 @@ def get_proxy_list():
 
 
 def download_using_archiver_key(record):
+    if not proxy_list:
+        get_proxy_list()
     try:
         print(record['_id'])
         ex = record['ex']
