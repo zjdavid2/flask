@@ -32,7 +32,7 @@ def map_tags_into_list(tags):
 
 def upload_metadata_using_json():
     latest_time: datetime = get_latest_record(1)[0]['ex']['upload_time']
-    latest_time_stamp = int(latest_time.timestamp())
+    latest_time_stamp = int(latest_time.timestamp()) - 50000
     crawler.main(latest_time_stamp)
 
     record_list = list()
@@ -72,7 +72,13 @@ def upload_metadata_using_json():
             # if len(record_list) >= 100:
             #     flush_formatted_record(record_list)
             #     record_list = list()
-            db.Gallery.replace_one({'ex.gid': str(gid)}, formatted_record, upsert=True)
+            existing_record: dict = db.Gallery.find_one({'ex.gid': str(gid)})
+            if existing_record is not None:
+                print("Find existing record")
+                existing_record.update(formatted_record)
+                db.Gallery.replace_one({'ex.gid': str(gid)}, existing_record)
+            else:
+                db.Gallery.replace_one({'ex.gid': str(gid)}, formatted_record, upsert=True)
             # print(insertion_result)
 
 

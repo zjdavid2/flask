@@ -5,6 +5,7 @@ import config
 from app.view.view import view
 from app.upload.upload import upload
 from app.auth.auth import auth_blueprint
+from app.ex_extension import extension
 from app.connect_database import Connect
 from flask_cors import CORS
 import logging
@@ -27,6 +28,7 @@ def create_app(config_file=config.Config):
     app.register_blueprint(view)
     app.register_blueprint(upload)
     app.register_blueprint(auth_blueprint)
+    app.register_blueprint(extension)
     CORS(app)
     # The line below doesn't work
     # g.db = MongoClient(config_file.DB_SERVER).Production
